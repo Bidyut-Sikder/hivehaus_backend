@@ -62,9 +62,4 @@ npm run start:dev
 └── README.md
 ```
 
-```
-Developer
---------------------------
-SAIKAT ROY CHANDAN
-saikotroy@devgmail.com
-```
+

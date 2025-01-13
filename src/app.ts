@@ -6,6 +6,7 @@ import ExpressMongoSanitize from "express-mongo-sanitize";
 import helmet from "helmet";
 import hpp from "hpp";
 import cookieParser from "cookie-parser";
+import globalErrorHandler from "./app/errors/globalErrorHandler";
 
 const app: Application = express();
 
@@ -27,5 +28,6 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/api", router);
 // Error Handling Middlewares section Started
+// app.use(globalErrorHandler)
 
 export default app;

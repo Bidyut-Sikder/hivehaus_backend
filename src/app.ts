@@ -27,7 +27,8 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api", router);
+
 // Error Handling Middlewares section Started
-// app.use(globalErrorHandler)
+app.use(globalErrorHandler)
 
 export default app;

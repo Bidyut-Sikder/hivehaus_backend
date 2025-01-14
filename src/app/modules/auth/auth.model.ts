@@ -3,12 +3,10 @@ import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { TUser } from "./auth.interfaces";
 
-
-
 export const userSchema = new Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     password: { type: String, required: true, select: false },
     phone: { type: String },
     role: {
@@ -18,8 +16,10 @@ export const userSchema = new Schema(
     },
     address: { type: String },
   },
+  //prevents data from being printed out as object or json
+  //but we can access password using user.password in auth.services.ts
   {
-    toJSON: { 
+    toJSON: {
       transform(doc, ret) {
         delete ret.password;
         return ret;

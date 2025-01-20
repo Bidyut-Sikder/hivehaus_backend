@@ -5,7 +5,7 @@ import { TUser } from "./auth.interfaces";
 import { UserModel } from "./auth.model";
 import AppError from "../../errors/AppError";
 
-const createUserService = async (payload: TUser) => {
+const signUpUserService = async (payload: TUser) => {
   const result = await UserModel.create(payload);
   return result;
 };
@@ -50,5 +50,5 @@ const loginUserService = async (payload: Partial<TUser>) => {
 
 export const AuthService = {
   loginUserService,
-  createUserService,
+  signUpUserService,
 };

@@ -23,7 +23,7 @@ const loginUserService = async (payload: Partial<TUser>) => {
   const user = await UserModel.findOne({ email }).select("+password");
   //here we get console password using console.log(user?.password)
   //but if we do console.log(user) we won't get the password field
-  //to getbetter idea check out auth.model.ts
+  //to get better idea check out auth.model.ts
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User is not found");

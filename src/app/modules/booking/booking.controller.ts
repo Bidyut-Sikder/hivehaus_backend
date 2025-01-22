@@ -53,10 +53,33 @@ const getPaidBookings = TryCatchError(
 )
 
 
+const updateBooking = TryCatchError(
+  async (req: Request, res: Response) => {
+      const result = await BookingService.adminUpdateBookingFromDB(req.params.id, req.body)
+      res.status(200).json({
+          success: true,
+          message: 'Bookings updated successfully',
+          data: result
+      })
+  }
+)
+
+const confirmBookingAndRejectBookingStatus = TryCatchError(async (req: Request, res: Response) => {
+  const result = await BookingService.confirmOrRejectBookingStatusIntoDB(req.params.id, req.body.status);
+
+  res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.booking
+  })
+})
+
 export const BookingController = {
   createBooking,
   getAdminAllBookings,
-  getPaidBookings
+  getPaidBookings,
+  updateBooking,
+  confirmBookingAndRejectBookingStatus
   // getUserAllBookings,
 
 };

@@ -19,6 +19,15 @@ router.get("/", BookingController.getAdminAllBookings);
 // router.get("/", authCheck("admin"), BookingController.getAdminAllBookings);
 router.get("/paid", BookingController.getPaidBookings);
 
+router.patch('/:id',
+  // authCheck('admin'),
+  BookingController.updateBooking
+)
 
+
+router.patch('/status/:id',
+  // authCheck('admin'),
+  BookingController.confirmBookingAndRejectBookingStatus
+)
 
 export const bookingRoutes = router;

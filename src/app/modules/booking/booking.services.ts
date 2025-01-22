@@ -7,6 +7,7 @@ import { SlotModal } from "../slots/slot.model";
 import { TBooking } from "./booking.interfaces";
 import { BookingModel } from "./booking.model";
 import { aggreGationPipeline } from "./booking.aggregation";
+import { ObjectId } from "mongodb";
 
 const createBookingIntoDB = async (payload: TBooking) => {
   const { date, slots, room, user } = payload;
@@ -103,9 +104,56 @@ const getPaymentCompleteBookingsFromDB = async () => {
   return transformedOutput;
 };
 
+const adminUpdateBookingFromDB = async (
+  id: string,
+  payload: Partial<TBooking>
+) => {
+  const result = await BookingModel.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
+  }
+  return result;
+};
+
+const confirmOrRejectBookingStatusIntoDB = async (
+  id: string,
+  status: string
+) => {
+  const validStatuses = ["confirmed", "unconfirmed"];
+  if (!validStatuses.includes(status)) {
+    return {
+      success: false,
+      message: "Invalid status. Must be 'confirmed' or 'unconfirmed'",
+    };
+  }
+
+  // Update the booking status
+  const booking = await BookingModel.findByIdAndUpdate(
+    id,
+    { isConfirmed: status },
+    { new: true, runValidators: true }
+  );
+
+  if (!booking) {
+    return { success: false, message: "Booking not found" };
+  }
+  const bookingPopulated = await aggreGationPipeline(new ObjectId(id));
+
+  return {
+    success: true,
+    message: `Booking ${status} successfully`,
+    booking: bookingPopulated,
+  };
+};
+
 export const BookingService = {
   createBookingIntoDB,
   getAdminAllBookingsFromDB,
   getPaymentCompleteBookingsFromDB,
+  adminUpdateBookingFromDB,
+  confirmOrRejectBookingStatusIntoDB,
   // getUserBookingsFromDB,
 };

@@ -195,11 +195,19 @@ const getAdminAllBookingsFromDB = async () => {
 
   return transformedOutput;
 };
+const getPaymentCompleteBookingsFromDB = async () => {
+  const result = await BookingModel.find({
+      isDeleted: { $ne: true },
+      paymentStatus: 'paid'
+  });
+  return result;
+};
 
 
 export const BookingService = {
   createBookingIntoDB,
   getAdminAllBookingsFromDB,
+  getPaymentCompleteBookingsFromDB
   // getUserBookingsFromDB,
 
 };

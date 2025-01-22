@@ -17,6 +17,8 @@ router.post(
 
 router.get("/",  BookingController.getAdminAllBookings);
 // router.get("/", authCheck("admin"), BookingController.getAdminAllBookings);
-
+router.get('/paid',
+  BookingController.getPaidBookings
+)
 
 export const bookingRoutes = router;

@@ -32,11 +32,31 @@ const getAdminAllBookings = TryCatchError(
     }
   }
 );
+const getPaidBookings = TryCatchError(
+  async (req: Request, res: Response) => {
+      const result = await BookingService.getPaymentCompleteBookingsFromDB()
+
+      if (result.length === 0) {
+          res.status(404).json({
+              success: false,
+              message: 'No Data Found',
+              data: result
+          })
+      } else {
+          res.status(200).json({
+              success: true,
+              message: 'Paid bookings retrieved successfully',
+              data: result
+          })
+      }
+  }
+)
 
 
 export const BookingController = {
   createBooking,
   getAdminAllBookings,
+  getPaidBookings
   // getUserAllBookings,
 
 };

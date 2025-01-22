@@ -9,7 +9,7 @@ import { BookingModel } from "./booking.model";
 import { aggreGationPipeline } from "./booking.aggregation";
 import { ObjectId } from "mongodb";
 
-const createBookingIntoDB = async (payload: TBooking) => {
+const createBookingService = async (payload: TBooking) => {
   const { date, slots, room, user } = payload;
   //  slots data = ["64ae1234ef56", "64ae5678cd34", "64ae7890ab12"];
   // room is the room id
@@ -78,7 +78,7 @@ const createBookingIntoDB = async (payload: TBooking) => {
   return transformedOutput;
 };
 
-const getAdminAllBookingsFromDB = async () => {
+const getAdminAllBookingsService = async () => {
   const result = await BookingModel.find({ isDeleted: { $ne: true } });
   // return result
   const transformedOutput = await Promise.all(
@@ -90,7 +90,7 @@ const getAdminAllBookingsFromDB = async () => {
 
   return transformedOutput;
 };
-const getPaymentCompleteBookingsFromDB = async () => {
+const getPaymentCompleteBookingsService = async () => {
   const result = await BookingModel.find({
     isDeleted: { $ne: true },
     paymentStatus: "paid",
@@ -104,7 +104,7 @@ const getPaymentCompleteBookingsFromDB = async () => {
   return transformedOutput;
 };
 
-const adminUpdateBookingFromDB = async (
+const adminUpdateBookingService = async (
   id: string,
   payload: Partial<TBooking>
 ) => {
@@ -118,7 +118,7 @@ const adminUpdateBookingFromDB = async (
   return result;
 };
 
-const confirmOrRejectBookingStatusIntoDB = async (
+const confirmOrRejectBookingStatusService = async (
   id: string,
   status: string
 ) => {
@@ -149,11 +149,25 @@ const confirmOrRejectBookingStatusIntoDB = async (
   };
 };
 
+const deleteBookingService = async (id: string) => {
+  const result = await BookingModel.findByIdAndUpdate(
+    { _id: id },
+    { isDeleted: true },
+    { new: true }
+  ).select("-paymentStatus -__v");
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
+  }
+  return result;
+};
+
 export const BookingService = {
-  createBookingIntoDB,
-  getAdminAllBookingsFromDB,
-  getPaymentCompleteBookingsFromDB,
-  adminUpdateBookingFromDB,
-  confirmOrRejectBookingStatusIntoDB,
+  createBookingService,
+  getAdminAllBookingsService,
+  getPaymentCompleteBookingsService,
+  adminUpdateBookingService,
+  confirmOrRejectBookingStatusService,
+  deleteBookingService,
   // getUserBookingsFromDB,
 };

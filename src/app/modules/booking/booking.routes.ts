@@ -26,8 +26,23 @@ router.patch('/:id',
 
 
 router.patch('/status/:id',
-  // authCheck('admin'),
-  BookingController.confirmBookingAndRejectBookingStatus
+  authCheck('admin'),
+  BookingController.confirmOrAndRejectBookingStatus
 )
+
+
+
+
+router.delete('/:id',
+  authCheck('admin'),
+  BookingController.deleteBooking
+)
+
+
+
+
+
+
+
 
 export const bookingRoutes = router;

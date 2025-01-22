@@ -6,6 +6,11 @@ import { UserModel } from "./auth.model";
 import AppError from "../../errors/AppError";
 
 const signUpUserService = async (payload: TUser) => {
+  const user = await UserModel.findOne({ email: payload.email });
+  if (user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
+  }
+
   const result = await UserModel.create(payload);
   return result;
 };

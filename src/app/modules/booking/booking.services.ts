@@ -6,6 +6,7 @@ import { RoomModel } from "../room/room.model";
 import { SlotModal } from "../slots/slot.model";
 import { TBooking } from "./booking.interfaces";
 import { BookingModel } from "./booking.model";
+import { aggreGationPipeline } from "./booking.aggregation";
 
 const createBookingIntoDB = async (payload: TBooking) => {
   const { date, slots, room, user } = payload;
@@ -53,13 +54,11 @@ const createBookingIntoDB = async (payload: TBooking) => {
 
   slotRecords.forEach(async (slot) => {
     slot.isBooked = true;
-    // console.log(slot._id)
     await SlotModal.findByIdAndUpdate(
       { _id: slot._id },
       { $set: { isBooked: true } }
     );
   });
-  // console.log(slotRecords)
 
   const totalAmount = roomRecord.pricePerSlot * slotRecords.length;
 
@@ -74,122 +73,17 @@ const createBookingIntoDB = async (payload: TBooking) => {
   const createdBooking = await BookingModel.create(booking);
   const bookingId = createdBooking._id;
 
-  const matching = {
-    $match: {
-      _id: bookingId, // Replace with your booking ID
-    },
-  };
-
-  const populateSlots = {
-    $lookup: {
-      from: "slots", // The name of the slots collection
-      localField: "slots", // Field in the booking collection
-      foreignField: "_id", // Field in the slots collection
-      as: "slotDetails", // The resulting array with slot data
-    },
-  };
-  const populateRoomDetails = {
-    $lookup: {
-      from: "rooms", // The name of the rooms collection
-      localField: "room", // Field in the booking collection
-      foreignField: "_id", // Field in the rooms collection
-      as: "room", // The resulting array with slot data
-    },
-  };
-  const populateUserDetails = {
-    $lookup: {
-      from: "users", // The name of the rooms collection
-      localField: "user", // Field in the booking collection
-      foreignField: "_id", // Field in the rooms collection
-      as: "user", // The resulting array with slot data
-    },
-  };
-
-  const projection = {
-    $project: {
-      "user.password": 0,
-      "room.image": 0,
-    },
-  };
-  const fulldata = await BookingModel.aggregate([
-    matching,
-
-    populateSlots,
-    populateRoomDetails,
-    populateUserDetails,
-    projection,
-  ]);
-  const transformedOutput = {
-    ...fulldata[0],
-    slots: fulldata[0].slotDetails, // Rename `slotDetails` to `slots`
-    room: fulldata[0].room[0], // Get the first room document
-    user: fulldata[0].user[0], // Get the first user document
-    slotDetails: undefined,
-  };
-
+  const transformedOutput = await aggreGationPipeline(bookingId);
   return transformedOutput;
 };
 
 const getAdminAllBookingsFromDB = async () => {
   const result = await BookingModel.find({ isDeleted: { $ne: true } });
-// return result
+  // return result
   const transformedOutput = await Promise.all(
     result.map(async (booking) => {
-      const bookingId = booking._id;
-
-      const matching = {
-        $match: {
-          _id: bookingId, // Replace with your booking ID
-        },
-      };
-
-      const populateSlots = {
-        $lookup: {
-          from: "slots", // The name of the slots collection
-          localField: "slots", // Field in the booking collection
-          foreignField: "_id", // Field in the slots collection
-          as: "slotDetails", // The resulting array with slot data
-        },
-      };
-      const populateRoomDetails = {
-        $lookup: {
-          from: "rooms", // The name of the rooms collection
-          localField: "room", // Field in the booking collection
-          foreignField: "_id", // Field in the rooms collection
-          as: "room", // The resulting array with slot data
-        },
-      };
-      const populateUserDetails = {
-        $lookup: {
-          from: "users", // The name of the rooms collection
-          localField: "user", // Field in the booking collection
-          foreignField: "_id", // Field in the rooms collection
-          as: "user", // The resulting array with slot data
-        },
-      };
-
-      const projection = {
-        $project: {
-          "user.password": 0,
-          "room.image": 0,
-        },
-      };
-      const fulldata = await BookingModel.aggregate([
-        matching,
-
-        populateSlots,
-        populateRoomDetails,
-        populateUserDetails,
-        projection,
-      ]);
-      const transformation = {
-        ...fulldata[0],
-        slots: fulldata[0].slotDetails, // Rename `slotDetails` to `slots`
-        room: fulldata[0].room[0], // Get the first room document
-        user: fulldata[0].user[0], // Get the first user document
-        slotDetails: undefined,
-      };
-      return transformation;
+      const allBookings = await aggreGationPipeline(booking._id);
+      return allBookings;
     })
   );
 
@@ -197,77 +91,21 @@ const getAdminAllBookingsFromDB = async () => {
 };
 const getPaymentCompleteBookingsFromDB = async () => {
   const result = await BookingModel.find({
-      isDeleted: { $ne: true },
-      paymentStatus: 'paid'
+    isDeleted: { $ne: true },
+    paymentStatus: "paid",
   });
-  return result;
+  const transformedOutput = await Promise.all(
+    result.map(async (booking) => {
+      const allBookings = await aggreGationPipeline(booking._id);
+      return allBookings;
+    })
+  );
+  return transformedOutput;
 };
-
 
 export const BookingService = {
   createBookingIntoDB,
   getAdminAllBookingsFromDB,
-  getPaymentCompleteBookingsFromDB
+  getPaymentCompleteBookingsFromDB,
   // getUserBookingsFromDB,
-
 };
-
-// const createBookingIntoDB = async (payload: TBooking) => {
-//     const { date, slots, room, user } = payload
-
-//     if (!user) {
-//         throw new AppError(httpStatus.NOT_FOUND, "User not found")
-//     }
-
-//     if (!room) {
-//         throw new AppError(httpStatus.NOT_FOUND, "Room not found")
-//     }
-
-//     const userRecord = await User.findById(user)
-
-//     if (!userRecord) {
-//         throw new AppError(httpStatus.NOT_FOUND, "User not found in database");
-//     }
-
-//     const roomRecord = await Room.findById(room)
-
-//     if (!roomRecord) {
-//         throw new AppError(httpStatus.NOT_FOUND, "Room not found in database");
-//     }
-
-//     const slotRecords = await Slot.find({ _id: { $in: slots } });
-//     if (slotRecords.length !== slots.length) {
-//         throw new AppError(httpStatus.NOT_FOUND, "Slots not found in the database");
-//     }
-
-//     const invalidSlots = slotRecords.filter(slot => !slot.room.equals(room));
-//     if (invalidSlots.length > 0) {
-//         throw new AppError(httpStatus.BAD_REQUEST, "Slots do not belong to this specified room");
-//     }
-
-//     slotRecords.forEach(slot => {
-//         slot.isBooked = true;
-//     });
-
-//     const totalAmount = roomRecord.pricePerSlot * slotRecords.length
-//     const transactionId = `TXN-${Date.now()}`;
-
-//     const booking = {
-//         transactionId,
-//         date,
-//         slots: slotRecords,
-//         room: roomRecord,
-//         user: userRecord,
-//         totalAmount
-//     }
-
-//     await Booking.create(booking)
-
-//     for (const slot of slotRecords) {
-//         await Slot.findByIdAndUpdate(slot._id, { isBooked: true });
-//     }
-
-//     const paymentSession = await initiatePayment(booking)
-//     console.log(paymentSession);
-//     return paymentSession
-// }

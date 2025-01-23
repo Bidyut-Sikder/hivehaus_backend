@@ -87,7 +87,34 @@ const deleteBooking = TryCatchError(async (req: Request, res: Response) => {
   });
 });
 
+//user-booking controller 
+const getUserAllBookings = TryCatchError(
+  async (req: Request, res: Response) => {
+      const token = req.headers.authorization
+      const result = await BookingService.getUserBookingsService(token)
+
+      if (result.length === 0) {
+          res.status(404).json({
+              success: false,
+              message: 'No Data Found',
+              data: result
+          })
+      } else {
+          res.status(200).json({
+              success: true,
+              message: 'User bookings retrieved successfully',
+              data: result
+          })
+      }
+  }
+)
+
+
+
+
+
 export const BookingController = {
+  getUserAllBookings,
   createBooking,
   getAdminAllBookings,
   getPaidBookings,

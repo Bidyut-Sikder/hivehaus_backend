@@ -1,6 +1,6 @@
 import { BookingModel } from "./booking.model";
 
-export const aggreGationPipeline = async (bookingId: any) => {
+export const aggreGationPipeline = async (bookingId: any, removeUser?: any) => {
   const matching = {
     $match: {
       _id: bookingId, // Replace with your booking ID
@@ -32,6 +32,7 @@ export const aggreGationPipeline = async (bookingId: any) => {
     },
   };
 
+  // console.log(projections)
   const projection = {
     $project: {
       "user.password": 0,
@@ -50,7 +51,8 @@ export const aggreGationPipeline = async (bookingId: any) => {
     ...fulldata[0],
     slots: fulldata[0].slotDetails, // Rename `slotDetails` to `slots`
     room: fulldata[0].room[0], // Get the first room document
-    user: fulldata[0].user[0], // Get the first user document
+    // user: fulldata[0].user[0], // Get the first user document
+    user: removeUser ? undefined : fulldata[0].user[0],
     slotDetails: undefined,
   };
   return transformedOutput;

@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post(
   "/",
-  //   authCheck("user"),
+    // authCheck("user"),
   requestValidator(bookingValidation.zod_createBookingSchema),
   BookingController.createBooking
 );
@@ -38,6 +38,12 @@ router.delete('/:id',
   BookingController.deleteBooking
 )
 
+
+///user Booking 
+router.get('/user-bookings',
+  authCheck('user'),
+  BookingController.getUserAllBookings
+)
 
 
 

@@ -8,6 +8,7 @@ import { TBooking } from "./booking.interfaces";
 import { BookingModel } from "./booking.model";
 import { aggreGationPipeline } from "./booking.aggregation";
 import { ObjectId } from "mongodb";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const createBookingService = async (payload: TBooking) => {
   const { date, slots, room, user } = payload;
@@ -162,7 +163,34 @@ const deleteBookingService = async (id: string) => {
   return result;
 };
 
+//user-booking service
+const getUserBookingsService = async (payload: any) => {
+  const token = payload.split(" ")[1];
+
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET_KEY as string
+  ) as JwtPayload;
+
+  const { userId } = decoded;
+  const result = await BookingModel.find({
+    user: new ObjectId(userId),
+    paymentStatus: { $ne: "paid" },
+  }); //.select("-user");
+
+  const transformedOutput = await Promise.all(
+    result.map(async (booking) => {
+      const allBookings = await aggreGationPipeline(booking._id, "user");
+      return allBookings;
+    })
+  );
+
+  // console.log(result);
+  return transformedOutput;
+};
+
 export const BookingService = {
+  getUserBookingsService,
   createBookingService,
   getAdminAllBookingsService,
   getPaymentCompleteBookingsService,

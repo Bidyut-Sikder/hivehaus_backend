@@ -4,79 +4,68 @@ import AppError from "../../errors/AppError";
 import { SlotModal } from "../slots/slot.model";
 import { BookingModel } from "../booking/booking.model";
 import { initiatePayment } from "./payment.utils";
-import { Request } from "express";
+import { Request, Response } from "express";
+// @ts-ignore
+import SSLCommerz from "sslcommerz-lts";
+import { UserModel } from "../auth/auth.model";
 
-const processPayment = async (bookingIds: string[], user: any) => {
-  let totalAmount = 0;
-  const bookings = [];
+const store_id = process.env.STORE_ID;
+const store_password = process.env.STORE_PASSWORD;
 
-  for (const bookingId of bookingIds) {
-    const booking = await BookingModel.findById(bookingId);
+const sslcommerz = new SSLCommerz(store_id, store_password, false); //use true in production
+const BACKEND_API =
+  process.env.BACKEND_API || "https://hotelbooking-app-nmk8.onrender.com";
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "https://hotelbooking-xi.vercel.app";
 
-    if (!booking) {
-      throw new AppError(
-        httpStatus.NOT_FOUND,
-        `Booking with ID ${bookingId} not found`
-      );
-    }
+const processPayment = async (req: Request, res: Response) => {
+  const { bookingId } = req.body;
+  const booking = await BookingModel.findById(bookingId);
+  // @ts-ignore
+  const userId = req.userId;
+  const userDetails = await UserModel.findOne({ _id: userId });
 
-    bookings.push(booking);
-
-    totalAmount += booking.totalAmount ?? 0;
+  if (!userDetails) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not found");
   }
 
-  if (totalAmount === 0) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Total amount is zero. No payment required."
-    );
-  }
+  const tranId = `TXN-${Date.now()}`;
 
-  const transactionId = `TXN-${Date.now()}`;
+  const data = {
+    total_amount: booking?.totalAmount,
+    currency: "BDT",
+    tran_id: tranId, // use unique tran_id for each api call
+    success_url: `${BACKEND_API}/api/payments/success/${tranId}`,
+    fail_url: `${BACKEND_API}/api/payments/fail/${tranId}`,
+    cancel_url: `${BACKEND_API}/api/payments/cancel/${tranId}`,
+    ipn_url: `${BACKEND_API}/api/payments/ipn/${tranId}`,
+    shipping_method: "No", //if it is (No) we do not need to provide any sipping information.
+    product_name: "workspace.",
+    product_category: "Reservation",
+    product_profile: "general",
+    cus_name: userDetails?.name,
+    cus_email: userDetails?.email,
+    cus_phone: userDetails?.phone, 
+  };
 
-  const paymentSession = await initiatePayment(
-    bookings,
-    user,
-    transactionId,
-    totalAmount
-  );
-
-  if (paymentSession.result === "true") {
-    for (const booking of bookings) {
-      await BookingModel.findByIdAndUpdate(booking._id, {
-        paymentStatus: "paid",
-        transactionId,
+  try {
+    const response = await sslcommerz.init(data);
+    if (response.status === "SUCCESS") {
+      res.json({
+        paymentUrl: response.GatewayPageURL,
+        tranId,
+        totalAmount: booking?.totalAmount,
+        bookingId,
       });
-
-      const slotIds = booking.slots.map((slot) => slot._id);
-
-      await SlotModal.updateMany(
-        { _id: { $in: slotIds } },
-        { $set: { isBooked: true } }
-      );
+      //   res.send({ payment_url: response.GatewayPageURL });
+    } else {
+      res.status(500).json({ message: "Failed to initiate payment", response });
     }
-
-    return {
-      paymentUrl: paymentSession.payment_url,
-      transactionId,
-      totalAmount,
-      bookingIds,
-    };
-  } else {
-    throw new AppError(
-      httpStatus.PAYMENT_REQUIRED,
-      "Payment initiation failed."
-    );
+  } catch (error) {
+    res.status(500).json({ message: "Error initiating payment", error });
   }
 };
 
-const PaymentSuccessForBookingServices = (req:Request) => {};
-const PaymentFailedForBookingServices = (req:Request) => {};
-const PaymentCanceledForBookingServices = (req:Request) => {};
-
 export const paymentServices = {
-  PaymentSuccessForBookingServices,
   processPayment,
-  PaymentFailedForBookingServices,
-  PaymentCanceledForBookingServices,
 };

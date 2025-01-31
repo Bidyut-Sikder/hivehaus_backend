@@ -1,16 +1,23 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
+import { ParamsDictionary } from "express-serve-static-core";
+import { ParsedQs } from "qs";
 import AppError from "../errors/AppError";
 import httpStatus from "http-status";
 import { UserModel } from "../modules/auth/auth.model";
 import TryCatchError from "../utils/TryCatchError";
-import { TUserRole } from "../modules/auth/auth.interfaces";
+
+type TUserRole = 'admin' | 'user' ; // Define the TUserRole type
+interface CustomRequest extends Request<ParamsDictionary, any, any, ParsedQs> {
+  userId?: string;
+}
+
 
 const authCheck = (...requiredRoles: TUserRole[]) => {
   console.log(...requiredRoles);
 
   return TryCatchError(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: CustomRequest, res: Response, next: NextFunction) => {
       const authHeader = req.headers.authorization;
 
       if (!authHeader) {
@@ -22,6 +29,7 @@ const authCheck = (...requiredRoles: TUserRole[]) => {
 
       const token = authHeader.split(" ")[1];
 
+     
       if (!token) {
         throw new AppError(
           httpStatus.UNAUTHORIZED,
@@ -35,6 +43,8 @@ const authCheck = (...requiredRoles: TUserRole[]) => {
       ) as JwtPayload;
 
       const { role, userId } = decoded;
+
+      req.userId = userId;
 
       // checking if the user is exist
       const user = await UserModel.findById(userId);

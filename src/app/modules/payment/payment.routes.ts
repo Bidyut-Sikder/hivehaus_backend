@@ -1,12 +1,17 @@
-import express from 'express'
-import { initiatePaymentForBooking } from './payment.controller';
+import express from "express";
+import {
+  initiatePaymentForBooking,
+  PaymentCanceledForBooking,
+  PaymentFailedForBooking,
+  PaymentSuccessForBooking,
+} from "./payment.controller";
+import authCheck from "../../middlewares/authCheck";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/init', initiatePaymentForBooking);
-// router.post("/success/:tranId", initiatePaymentForBooking);
-// router.post("/fail/:tranId", initiatePaymentForBooking);
-// router.post("/cancel/:tranId", initiatePaymentForBooking);
-// router.post("/ipn", initiatePaymentForBooking);
+router.post("/init", authCheck("user"), initiatePaymentForBooking);
+router.post("/success/:tranId", PaymentSuccessForBooking);
+router.post("/fail/:tranId", PaymentFailedForBooking);
+router.post("/cancel/:tranId", PaymentCanceledForBooking);
 
-export const PaymentRoutes = router
+export const PaymentRoutes = router;

@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post(
   "/",
-    // authCheck("user"),
+  // authCheck("user"),
   requestValidator(bookingValidation.zod_createBookingSchema),
   BookingController.createBooking
 );
@@ -19,36 +19,25 @@ router.get("/", BookingController.getAdminAllBookings);
 // router.get("/", authCheck("admin"), BookingController.getAdminAllBookings);
 router.get("/paid", BookingController.getPaidBookings);
 
-router.patch('/:id',
+router.patch(
+  "/:id",
   // authCheck('admin'),
   BookingController.updateBooking
-)
+);
 
-
-router.patch('/status/:id',
-  authCheck('admin'),
+router.patch(
+  "/status/:id",
+  authCheck("admin"),
   BookingController.confirmOrAndRejectBookingStatus
-)
+);
 
+router.delete("/:id", authCheck("admin"), BookingController.deleteBooking);
 
-
-
-router.delete('/:id',
-  authCheck('admin'),
-  BookingController.deleteBooking
-)
-
-
-///user Booking 
-router.get('/user-bookings',
-  authCheck('user'),
+///user Booking
+router.get(
+  "/user-bookings",
+  authCheck("user"),
   BookingController.getUserAllBookings
-)
-
-
-
-
-
-
+);
 
 export const bookingRoutes = router;

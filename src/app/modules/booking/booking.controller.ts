@@ -87,31 +87,47 @@ const deleteBooking = TryCatchError(async (req: Request, res: Response) => {
   });
 });
 
-//user-booking controller 
+//user-booking controller
 const getUserAllBookings = TryCatchError(
   async (req: Request, res: Response) => {
-      const token = req.headers.authorization
-      const result = await BookingService.getUserBookingsService(token)
+    const token = req.headers.authorization;
+    const result = await BookingService.getUserBookingsService(token);
 
-      if (result.length === 0) {
-          res.status(404).json({
-              success: false,
-              message: 'No Data Found',
-              data: result
-          })
-      } else {
-          res.status(200).json({
-              success: true,
-              message: 'User bookings retrieved successfully',
-              data: result
-          })
-      }
+    if (result.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "No Data Found",
+        data: result,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User bookings retrieved successfully",
+        data: result,
+      });
+    }
   }
-)
+);
+const getUserAllBookingsByDate = TryCatchError(
+  async (req: Request, res: Response) => {
+    
+    const result = await BookingService.getUserBookingsByDateService(req);
 
-
-
-
+    if (result.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "No Data Found",
+        data: result,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User bookings by date retrieved successfully",
+        data: result,
+      });
+    }
+  }
+);
 
 export const BookingController = {
   getUserAllBookings,
@@ -121,5 +137,6 @@ export const BookingController = {
   updateBooking,
   confirmOrAndRejectBookingStatus,
   deleteBooking,
+  getUserAllBookingsByDate,
   // getUserAllBookings,
 };

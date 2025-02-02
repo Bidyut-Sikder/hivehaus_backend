@@ -39,5 +39,10 @@ router.get(
   authCheck("user"),
   BookingController.getUserAllBookings
 );
-
+//////////
+router.get(
+  "/check-availability",
+  // authCheck("user"),
+  BookingController.getUserAllBookingsByDate
+);
 export const bookingRoutes = router;

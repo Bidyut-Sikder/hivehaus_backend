@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
-
+import { Types } from 'mongoose';
 import { RoomModel } from "./room.model";
 import { TRoom } from "./room.interfaces";
+
 
 const createRoomService = async (payload: TRoom) => {
   const result = await RoomModel.create(payload);
@@ -58,13 +59,53 @@ const getRoomsService = async (queryParams: any) => {
 // }
 
 const getRoomByIdService = async (id: string) => {
-  const result = await RoomModel.findOne({ _id: id, isDeleted: false });
+  // const result = await RoomModel.findOne({ _id: id, isDeleted: false });
+  // if (!result) {
+  //   throw new AppError(httpStatus.NOT_FOUND, "No Data Found");
+  // }
+  // return result;
+  const matching = {
+    $match: {
+      _id: new Types.ObjectId(id), // Replace with your booking ID
+      isDeleted: false
+    },
+  };
 
-  if (!result) {
-    throw new AppError(httpStatus.NOT_FOUND, "No Data Found");
-  }
+  const populateSlots = {
+    $lookup: {
+      from: "slots", // The name of the slots collection
+      localField: "_id", // Field in the roommodel collection
+      foreignField: "room", // Field in the slots collection
+      as: "slots", // The resulting array with slot data
+    },
+  };
+  const filterSlots = {
+    $addFields: {
+      slots: {
+        $filter: {
+          input: "$slots",
+          as: "slot",
+          cond: { $eq: ["$$slot.isBooked", false] },
+        },
+      },
+    },
+  };
+  const resultt = await RoomModel.aggregate([
+    matching,
+    populateSlots,
+    filterSlots
+   
+  ]);
 
-  return result;
+
+  // const result = await RoomModel.findOne({ _id: id, isDeleted: false });
+  // if (!result) {
+  //   throw new AppError(httpStatus.NOT_FOUND, "No Data Found");
+  // }
+
+  return resultt[0];
+
+
 };
 
 const updateSingleRoomService = async (id: string, payload: Partial<TRoom>) => {

@@ -14,7 +14,7 @@ interface CustomRequest extends Request<ParamsDictionary, any, any, ParsedQs> {
 
 
 const authCheck = (...requiredRoles: TUserRole[]) => {
-  console.log(...requiredRoles);
+  
 
   return TryCatchError(
     async (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -52,6 +52,7 @@ const authCheck = (...requiredRoles: TUserRole[]) => {
       if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
       }
+      console.log(role)
 
       if (requiredRoles && !requiredRoles.includes(role)) {
         throw new AppError(

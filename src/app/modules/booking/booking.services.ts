@@ -9,6 +9,7 @@ import { BookingModel } from "./booking.model";
 import { aggreGationPipeline } from "./booking.aggregation";
 import { ObjectId } from "mongodb";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { convertTo24HourFormat } from "./booking.utils";
 
 const createBookingService = async (payload: TBooking) => {
   const { date, slots, room, user } = payload;
@@ -189,6 +190,24 @@ const getUserBookingsService = async (payload: any) => {
   return transformedOutput;
 };
 
+const getUserBookingsByDateService = async (req: any) => {
+  const { startTime, endTime, date, roomId } = req.query;
+  const start = convertTo24HourFormat(startTime);
+  const end = convertTo24HourFormat(endTime);
+  //using roomId and date find,startTime, endTime the slots
+  const result = await SlotModal.find({
+    room: new ObjectId(roomId),
+    date: date,
+    startTime: { $gte: start },
+    endTime: { $lte: end },
+  })
+
+
+
+  console.log(result);
+  return result;
+};
+
 export const BookingService = {
   getUserBookingsService,
   createBookingService,
@@ -197,5 +216,6 @@ export const BookingService = {
   adminUpdateBookingService,
   confirmOrRejectBookingStatusService,
   deleteBookingService,
+  getUserBookingsByDateService,
   // getUserBookingsFromDB,
 };

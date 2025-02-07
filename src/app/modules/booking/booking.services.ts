@@ -52,8 +52,6 @@ const getAdminBookingByBookingIdService = async (req: any) => {
   return BookingData;
 };
 
-
-
 const getPaymentCompleteBookingsService = async () => {
   const result = await BookingModel.find({
     isDeleted: { $ne: true },
@@ -162,11 +160,23 @@ const getUserBookingsByDateService = async (req: any) => {
   const start = convertTo24HourFormat(startTime);
   const end = convertTo24HourFormat(endTime);
   //using roomId and date find,startTime, endTime the slots
-  const result = await SlotModal.find({
-    room: new ObjectId(req.query.roomId),
-    date: date,
-    startTime: { $gte: start },
-    endTime: { $lte: end },
+  function timeToDecimal(time: string) {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours + minutes / 60;
+  }
+  const localDecimalStart = timeToDecimal(start);
+  const localDecimalEnd = timeToDecimal(end);
+
+  const result = await SlotModal.findOne({
+    room: new ObjectId(req.query.roomId), // Match the room
+    date: date, // Match the booking date
+    isDeleted: false, // Ignore deleted bookings
+    $or: [
+      {
+        startTime: { $lt: localDecimalEnd },
+        endTime: { $gt: localDecimalStart },
+      }, // Check for overlap
+    ],
   });
 
   return result;
@@ -199,7 +209,6 @@ const createBookingService = async (req: any) => {
   const start = convertTo24HourFormat(startTime);
   const end = convertTo24HourFormat(endTime);
 
-
   const result = await SlotModal.find({
     room: new ObjectId(roomId),
     date: date,
@@ -227,19 +236,18 @@ const createBookingService = async (req: any) => {
       slot: slot._id,
       totalAmount: totalAmount,
     });
-
   }
 
   return "transformedOutput";
 };
 
 export const BookingService = {
-  getUserBookingsService,
-  createBookingService,
+  // getUserBookingsService,
+  // createBookingService,
   getAdminAllBookingsService,
-  getPaymentCompleteBookingsService,
-  adminUpdateBookingService,
-  confirmOrRejectBookingStatusService,
+  // getPaymentCompleteBookingsService,
+  // adminUpdateBookingService,
+  // confirmOrRejectBookingStatusService,
   deleteBookingService,
   getUserBookingsByDateService,
   getUserPaidBookingsService,

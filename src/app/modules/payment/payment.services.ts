@@ -91,22 +91,42 @@ const processPayment = async (req: any, res: Response) => {
   const start = convertTo24HourFormat(startTime);
   const end = convertTo24HourFormat(endTime);
 
+  function timeToDecimal(time: string) {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours + minutes / 60;
+  }
+  const localDecimalStart = timeToDecimal(start);
+  const localDecimalEnd = timeToDecimal(end);
+
   const result = await SlotModal.find({
     room: new ObjectId(roomId),
     date: date,
-    startTime: { $lte: start }, // Stored startTime should be before or equal to input start
-    endTime: { $gte: end }, // Stored endTime should be after or equal to input end
+    startTime: { $lte: localDecimalStart }, // Stored startTime should be before or equal to input start
+    endTime: { $gte: localDecimalEnd }, // Stored endTime should be after or equal to input end
   });
+
+  // const result = await SlotModal.find({
+  //   room: new ObjectId(roomId),
+  //   date: date,
+  //   startTime: { $lte: start }, // Stored startTime should be before or equal to input start
+  //   endTime: { $gte: end }, // Stored endTime should be after or equal to input end
+  // });
 
   if (result.length > 0) {
     throw new AppError(httpStatus.BAD_REQUEST, "Slot already booked");
   }
   const slot = await SlotModal.create({
     room: new ObjectId(roomId),
-    startTime: start,
-    endTime: end,
+    startTime: localDecimalStart,
+    endTime: localDecimalEnd,
     date: date,
   });
+  // const slot = await SlotModal.create({
+  //   room: new ObjectId(roomId),
+  //   startTime: start,
+  //   endTime: end,
+  //   date: date,
+  // });
   const totalAmount = timeDifference * pricePerSlot;
 
   const booking = await BookingModel.create({

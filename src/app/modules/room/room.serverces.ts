@@ -10,10 +10,11 @@ import { BookingModel } from "../booking/booking.model";
 import { SlotModal } from "../slots/slot.model";
 
 const createRoomService = async (req: any) => {
-  const { name, roomNo, capacity, pricePerSlot, floorNo, amenities } = req.body;
+  const { name,description, roomNo, capacity, pricePerSlot, floorNo, amenities } = req.body;
 
   const parsedData = {
     name,
+    description,
     roomNo: parseInt(roomNo, 10),
     capacity: parseInt(capacity, 10),
     pricePerSlot: parseFloat(pricePerSlot),
@@ -79,11 +80,7 @@ const getRoomsService = async (queryParams: any) => {
 };
 
 const getRoomByIdService = async (id: string) => {
-  // const result = await RoomModel.findOne({ _id: id, isDeleted: false });
-  // if (!result) {
-  //   throw new AppError(httpStatus.NOT_FOUND, "No Data Found");
-  // }
-  // return result;
+
   const matching = {
     $match: {
       _id: new Types.ObjectId(id), // Replace with your booking ID

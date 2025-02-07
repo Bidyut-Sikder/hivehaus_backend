@@ -9,7 +9,7 @@ const router = Router();
 
 router.use("/auth", authRouter);
 router.use("/rooms", roomRoutes);
-router.use("/slots", slotRoutes);
+// router.use("/slots", slotRoutes);
 router.use("/bookings", bookingRoutes);
 router.use("/payments", PaymentRoutes);
 

@@ -25,13 +25,13 @@ router.get('/availability',
     slotController.getAvailableAllSlots
 )
 
-router.patch('/:id',
-    requestValidator(zod_slotValidation.zod_updateSlotValidationSchema),
-    slotController.updatedSlots
-)
+// router.patch('/:id',
+//     requestValidator(zod_slotValidation.zod_updateSlotValidationSchema),
+//     slotController.updatedSlots
+// )
 
-router.delete('/:id',
-    slotController.deleteSlot
-)
+// router.delete('/:id',
+//     slotController.deleteSlot
+// )
 
 export const slotRoutes = router

@@ -119,7 +119,6 @@ const processPayment = async (req: any, res: Response) => {
     totalAmount: totalAmount,
   });
 
-  console.log(booking._id)
   // @ts-ignore
   const userId = req.userId;
   const userDetails = await UserModel.findOne({ _id: userId });
@@ -129,7 +128,7 @@ const processPayment = async (req: any, res: Response) => {
   }
 
   const tranId = `TXN-${Date.now()}`;
-  console.log(timeDifference, pricePerSlot, totalAmount);
+
   const data = {
     total_amount: totalAmount,
     currency: "BDT",
@@ -139,14 +138,14 @@ const processPayment = async (req: any, res: Response) => {
     cancel_url: `${BACKEND_API}/api/payments/cancel/${booking._id}`,
     ipn_url: `${BACKEND_API}/api/payments/ipn/${booking._id}`,
     shipping_method: "No", //if it is (No) we do not need to provide any sipping information.
-    product_name: "workspace.",
+    product_name: "HiveHaus.",
     product_category: "Reservation",
     product_profile: "general",
     cus_name: userDetails?.name,
     cus_email: userDetails?.email,
     cus_phone: userDetails?.phone,
   };
-console.log(data)
+
   try {
     const response = await sslcommerz.init(data);
     if (response.status === "SUCCESS") {

@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 export type TBooking = {
   date: string;
-  slots: Types.ObjectId;
+  slot: Types.ObjectId;
   room: Types.ObjectId;
   user: Types.ObjectId;
   isConfirmed: string;

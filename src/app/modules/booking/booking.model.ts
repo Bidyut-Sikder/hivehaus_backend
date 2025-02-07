@@ -76,14 +76,12 @@ import { ObjectId } from "mongodb";
 //   "totalAmount": 150.75
 // }
 
-
-
 //My Boking Model
 
 const bookingSchema = new Schema({
   date: { type: String, required: true },
-  slots: { type: [ObjectId], required: true },
-  room: { type: ObjectId, required: true },
+  slot: { type: ObjectId, required: true, ref: "Slot" },
+  room: { type: ObjectId, required: true,ref: "Room" },
   user: { type: ObjectId, required: true },
   isConfirmed: { type: String, default: "unconfirmed" },
   isDeleted: { type: Boolean, default: false },

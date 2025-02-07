@@ -9,79 +9,30 @@ import { BookingModel } from "./booking.model";
 import { aggreGationPipeline } from "./booking.aggregation";
 import { ObjectId } from "mongodb";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { convertTo24HourFormat } from "./booking.utils";
+import { convertTo24HourFormat, getTimeDifference } from "./booking.utils";
 
-const createBookingService = async (payload: TBooking) => {
-  const { date, slots, room, user } = payload;
-  //  slots data = ["64ae1234ef56", "64ae5678cd34", "64ae7890ab12"];
-  // room is the room id
-  // user is the user id
-  // slots are the timeslots for the room to be booked
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "User not found");
-  }
+const getUserPaidBookingsService = async (req: any) => {
+  const fulldata = await BookingModel.find({
+    user: new ObjectId(req.userId),
+    isConfirmed: "confirmed",
+  })
+    .populate({
+      path: "slot",
+      select: "-room", // Exclude the `room` field
+    })
+    .populate({
+      path: "room",
+    });
 
-  if (!room) {
-    throw new AppError(httpStatus.NOT_FOUND, "Room not found");
-  }
-
-  const userRecord = await UserModel.findById(user);
-
-  if (!userRecord) {
-    throw new AppError(httpStatus.NOT_FOUND, "User not found in database");
-  }
-
-  const roomRecord = await RoomModel.findById(room);
-
-  if (!roomRecord) {
-    throw new AppError(httpStatus.NOT_FOUND, "Room not found in database");
-  }
-
-  const slotRecords = await SlotModal.find({ _id: { $in: slots } });
-  //["64ae1234ef56", "64ae5678cd34", "64ae7890ab12"] are the slots aviailable in the database or not
-  if (slotRecords.length !== slots.length) {
-    // if they are not available in the database
-    throw new AppError(httpStatus.NOT_FOUND, "Slots not found in the database");
-  }
-
-  //if slots created are not related to  the roomid
-  const invalidSlots = slotRecords.filter((slot) => !slot.room.equals(room));
-  if (invalidSlots.length > 0) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Slots do not belong to this specified room"
-    );
-  }
-
-  // console.log(slotRecords)
-
-  slotRecords.forEach(async (slot) => {
-    slot.isBooked = true;
-    await SlotModal.findByIdAndUpdate(
-      { _id: slot._id },
-      { $set: { isBooked: true } }
-    );
-  });
-
-  const totalAmount = roomRecord.pricePerSlot * slotRecords.length;
-
-  const booking = {
-    date,
-    slots: slotRecords,
-    room: roomRecord,
-    user: userRecord,
-    totalAmount,
-  };
-
-  const createdBooking = await BookingModel.create(booking);
-  const bookingId = createdBooking._id;
-
-  const transformedOutput = await aggreGationPipeline(bookingId);
-  return transformedOutput;
+  return fulldata;
 };
-
+//admin services
 const getAdminAllBookingsService = async () => {
-  const result = await BookingModel.find({ isDeleted: { $ne: true } });
+  const result = await BookingModel.find({
+    // isDeleted: { $ne: true },
+    isConfirmed: "confirmed",
+    paymentStatus: "paid",
+  });
   // return result
   const transformedOutput = await Promise.all(
     result.map(async (booking) => {
@@ -92,6 +43,17 @@ const getAdminAllBookingsService = async () => {
 
   return transformedOutput;
 };
+
+const getAdminBookingByBookingIdService = async (req: any) => {
+  const bookingId = req.params.id;
+  const booking = await BookingModel.findOne({ _id: new ObjectId(bookingId) });
+  const BookingData = await aggreGationPipeline(booking?._id);
+
+  return BookingData;
+};
+
+
+
 const getPaymentCompleteBookingsService = async () => {
   const result = await BookingModel.find({
     isDeleted: { $ne: true },
@@ -191,21 +153,84 @@ const getUserBookingsService = async (payload: any) => {
 };
 
 const getUserBookingsByDateService = async (req: any) => {
-  const { startTime, endTime, date, roomId } = req.query;
+  // const { startTime, endTime, date, roomId } = req.query;
+
+  const startTime = decodeURIComponent(req.query.startTime);
+  const endTime = decodeURIComponent(req.query.endTime);
+  const date = decodeURIComponent(req.query.date);
+
   const start = convertTo24HourFormat(startTime);
   const end = convertTo24HourFormat(endTime);
   //using roomId and date find,startTime, endTime the slots
   const result = await SlotModal.find({
-    room: new ObjectId(roomId),
+    room: new ObjectId(req.query.roomId),
     date: date,
     startTime: { $gte: start },
     endTime: { $lte: end },
-  })
+  });
 
-
-
-  console.log(result);
   return result;
+};
+
+//i will get
+// {
+//   "roomId": "679ca57f6a683934a71cb09d",
+//   "startTime": "09:00 AM",
+//   "endTime": "05:00 PM",
+//   "date": "2025-02-03",
+//   "pricePerSlot": 120
+// }
+
+//my createBookingNew routeservice
+
+const createBookingService = async (req: any) => {
+  const { roomId, startTime, endTime, date, pricePerSlot } = req.body;
+
+  if (!roomId || !startTime || !endTime || !date || !pricePerSlot) {
+    throw new AppError(httpStatus.NOT_FOUND, "Something went wrong.");
+  }
+  const userRecord = await UserModel.findById(req.userId);
+
+  if (!userRecord) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found in database");
+  }
+
+  const timeDifference = getTimeDifference(startTime, endTime);
+  const start = convertTo24HourFormat(startTime);
+  const end = convertTo24HourFormat(endTime);
+
+
+  const result = await SlotModal.find({
+    room: new ObjectId(roomId),
+    date: date,
+    startTime: { $lte: start }, // Stored startTime should be before or equal to input start
+    endTime: { $gte: end }, // Stored endTime should be after or equal to input end
+  });
+
+  if (result.length > 0) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Slot already booked");
+  } else {
+    const slot = await SlotModal.create({
+      room: new ObjectId(roomId),
+      startTime: start,
+      endTime: end,
+      date: date,
+    });
+    const totalAmount = timeDifference * pricePerSlot;
+
+    const booking = await BookingModel.create({
+      user: req.userId,
+      room: new ObjectId(roomId),
+      startTime: start,
+      endTime: end,
+      date: date,
+      slot: slot._id,
+      totalAmount: totalAmount,
+    });
+
+  }
+
+  return "transformedOutput";
 };
 
 export const BookingService = {
@@ -217,5 +242,7 @@ export const BookingService = {
   confirmOrRejectBookingStatusService,
   deleteBookingService,
   getUserBookingsByDateService,
+  getUserPaidBookingsService,
+  getAdminBookingByBookingIdService,
   // getUserBookingsFromDB,
 };

@@ -3,8 +3,10 @@ import { Request, Response } from "express";
 import TryCatchError from "../../utils/TryCatchError";
 import { BookingService } from "./booking.services";
 
+
+
 const createBooking = TryCatchError(async (req: Request, res: Response) => {
-  const result = await BookingService.createBookingService(req.body);
+  const result = await BookingService.createBookingService(req);
 
   res.status(200).json({
     success: true,
@@ -13,6 +15,20 @@ const createBooking = TryCatchError(async (req: Request, res: Response) => {
   });
 });
 
+
+
+
+// const createBooking = TryCatchError(async (req: Request, res: Response) => {
+//   const result = await BookingService.createBookingService(req.body);
+
+//   res.status(200).json({
+//     success: true,
+//     message: "Booking created successfully",
+//     data: result,
+//   });
+// });
+
+//admin bookings
 const getAdminAllBookings = TryCatchError(
   async (req: Request, res: Response) => {
     const result = await BookingService.getAdminAllBookingsService();
@@ -32,6 +48,50 @@ const getAdminAllBookings = TryCatchError(
     }
   }
 );
+const getAdminBookingByBookingId = TryCatchError(
+  async (req: Request, res: Response) => {
+    const result = await BookingService.getAdminBookingByBookingIdService(req);
+
+    // if (result.length === 0) {
+    //   res.status(404).json({
+    //     success: false,
+    //     message: "No Data Found",
+    //     data: result,
+    //   });
+    // } else {
+      res.status(200).json({
+        success: true,
+        message: " Booking retrieved successfully",
+        data: result,
+      });
+    }
+  // }
+);
+
+
+
+
+
+const getUserPaidBookings = TryCatchError(async (req: Request, res: Response) => {
+  const result = await BookingService.getUserPaidBookingsService(req);
+
+  if (result.length === 0) {
+    res.status(404).json({
+      success: false,
+      message: "No Data Found",
+      data: result,
+    });
+  } else {
+    res.status(200).json({
+      success: true,
+      message: "Paid bookings retrieved successfully",
+      data: result,
+    });
+  }
+});
+
+
+
 const getPaidBookings = TryCatchError(async (req: Request, res: Response) => {
   const result = await BookingService.getPaymentCompleteBookingsService();
 
@@ -119,6 +179,7 @@ const getUserAllBookingsByDate = TryCatchError(
         message: "No Data Found",
         data: result,
       });
+
     } else {
       res.status(200).json({
         success: true,
@@ -138,5 +199,7 @@ export const BookingController = {
   confirmOrAndRejectBookingStatus,
   deleteBooking,
   getUserAllBookingsByDate,
+  getUserPaidBookings,
+  getAdminBookingByBookingId
   // getUserAllBookings,
 };

@@ -10,8 +10,8 @@ import authCheck from "../../middlewares/authCheck";
 const router = express.Router();
 
 router.post("/init", authCheck("user"), initiatePaymentForBooking);
-router.post("/success/:tranId", PaymentSuccessForBooking);
-router.post("/fail/:tranId", PaymentFailedForBooking);
-router.post("/cancel/:tranId", PaymentCanceledForBooking);
+router.post("/success/:bookingId", PaymentSuccessForBooking);
+router.post("/fail/:bookingId", PaymentFailedForBooking);
+router.post("/cancel/:bookingId", PaymentCanceledForBooking);
 
 export const PaymentRoutes = router;

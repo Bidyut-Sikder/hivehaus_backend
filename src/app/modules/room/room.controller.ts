@@ -5,7 +5,9 @@ import { RoomService } from "./room.serverces";
 
 
 const createRoom = TryCatchError(async (req: Request, res: Response) => {
-    const result = await RoomService.createRoomService(req.body)
+   
+  
+    const result = await RoomService.createRoomService(req)
 
     res.status(200).json({
         success: true,
@@ -35,7 +37,7 @@ const getRooms = TryCatchError(async (req: Request, res: Response) => {
 })
 
 const getRoomById = TryCatchError(async (req: Request, res: Response) => {
-    console.log(req.params)
+
     const result = await RoomService.getRoomByIdService(req.params.id);
 
     res.status(200).json({
@@ -46,12 +48,17 @@ const getRoomById = TryCatchError(async (req: Request, res: Response) => {
 })
 
 const updateSingleRoom = TryCatchError(async (req: Request, res: Response) => {
-    const result = await RoomService.updateSingleRoomService(req.params.id, req.body);
+   
 
+
+
+    const result = await RoomService.updateSingleRoomService(req);
+
+ 
     res.status(200).json({
         success: true,
         message: 'Room updated successfully',
-        data: result
+        data: 'result'
     })
 })
 

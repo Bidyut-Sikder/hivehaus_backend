@@ -7,15 +7,12 @@ import httpStatus from "http-status";
 import { UserModel } from "../modules/auth/auth.model";
 import TryCatchError from "../utils/TryCatchError";
 
-type TUserRole = 'admin' | 'user' ; // Define the TUserRole type
+type TUserRole = "admin" | "user"; // Define the TUserRole type
 interface CustomRequest extends Request<ParamsDictionary, any, any, ParsedQs> {
   userId?: string;
 }
 
-
 const authCheck = (...requiredRoles: TUserRole[]) => {
-  
-
   return TryCatchError(
     async (req: CustomRequest, res: Response, next: NextFunction) => {
       const authHeader = req.headers.authorization;
@@ -28,8 +25,7 @@ const authCheck = (...requiredRoles: TUserRole[]) => {
       }
 
       const token = authHeader.split(" ")[1];
-
-     
+      
       if (!token) {
         throw new AppError(
           httpStatus.UNAUTHORIZED,
@@ -52,7 +48,6 @@ const authCheck = (...requiredRoles: TUserRole[]) => {
       if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
       }
-      console.log(role)
 
       if (requiredRoles && !requiredRoles.includes(role)) {
         throw new AppError(

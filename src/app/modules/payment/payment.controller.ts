@@ -8,7 +8,6 @@ import { SlotModal } from "../slots/slot.model";
 export const initiatePaymentForBooking = TryCatchError(
   async (req: Request, res: Response) => {
     const paymentResult = await paymentServices.processPayment(req, res);
-
   }
 );
 
@@ -27,7 +26,7 @@ export const PaymentSuccessForBooking = TryCatchError(
       { new: true }
     );
 
-    res.redirect(`http://localhost:5173/success`);
+    res.redirect(`${process.env.FRONTEND_URL}/success`);
     // res.redirect(302, `http://localhost:5173/success`);
   }
 );
@@ -41,8 +40,9 @@ export const PaymentFailedForBooking = TryCatchError(
       await SlotModal.deleteOne({ _id: new ObjectId(booking.slot) });
       await BookingModel.deleteOne({ _id: new ObjectId(bookingId) });
     }
+    res.redirect(`${process.env.FRONTEND_URL}/failed`);
 
-    res.redirect(302, `http://localhost:5173/failed`);
+    // res.redirect(302, `http://localhost:5173/failed`);
   }
 );
 export const PaymentCanceledForBooking = TryCatchError(
@@ -54,7 +54,8 @@ export const PaymentCanceledForBooking = TryCatchError(
       await SlotModal.deleteOne({ _id: new ObjectId(booking.slot) });
       await BookingModel.deleteOne({ _id: new ObjectId(bookingId) });
     }
+    res.redirect(`${process.env.FRONTEND_URL}/canceled`);
 
-    res.redirect(302, `http://localhost:5173/canceled`);
+    // res.redirect(302, `http://localhost:5173/canceled`);
   }
 );

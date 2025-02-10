@@ -29,7 +29,7 @@ exports.PaymentSuccessForBooking = (0, TryCatchError_1.default)((req, res) => __
             paymentStatus: "paid",
         },
     }, { new: true });
-    res.redirect(`http://localhost:5173/success`);
+    res.redirect(`${process.env.FRONTEND_URL}/success`);
     // res.redirect(302, `http://localhost:5173/success`);
 }));
 exports.PaymentFailedForBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -39,7 +39,8 @@ exports.PaymentFailedForBooking = (0, TryCatchError_1.default)((req, res) => __a
         yield slot_model_1.SlotModal.deleteOne({ _id: new mongodb_1.ObjectId(booking.slot) });
         yield booking_model_1.BookingModel.deleteOne({ _id: new mongodb_1.ObjectId(bookingId) });
     }
-    res.redirect(302, `http://localhost:5173/failed`);
+    res.redirect(`${process.env.FRONTEND_URL}/failed`);
+    // res.redirect(302, `http://localhost:5173/failed`);
 }));
 exports.PaymentCanceledForBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const bookingId = req.params.bookingId;
@@ -48,5 +49,6 @@ exports.PaymentCanceledForBooking = (0, TryCatchError_1.default)((req, res) => _
         yield slot_model_1.SlotModal.deleteOne({ _id: new mongodb_1.ObjectId(booking.slot) });
         yield booking_model_1.BookingModel.deleteOne({ _id: new mongodb_1.ObjectId(bookingId) });
     }
-    res.redirect(302, `http://localhost:5173/canceled`);
+    res.redirect(`${process.env.FRONTEND_URL}/canceled`);
+    // res.redirect(302, `http://localhost:5173/canceled`);
 }));

@@ -16,69 +16,45 @@ exports.BookingService = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const auth_model_1 = require("../auth/auth.model");
-const room_model_1 = require("../room/room.model");
 const slot_model_1 = require("../slots/slot.model");
 const booking_model_1 = require("./booking.model");
 const booking_aggregation_1 = require("./booking.aggregation");
 const mongodb_1 = require("mongodb");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const createBookingService = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { date, slots, room, user } = payload;
-    //  slots data = ["64ae1234ef56", "64ae5678cd34", "64ae7890ab12"];
-    // room is the room id
-    // user is the user id
-    // slots are the timeslots for the room to be booked
-    if (!user) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");
-    }
-    if (!room) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Room not found");
-    }
-    const userRecord = yield auth_model_1.UserModel.findById(user);
-    if (!userRecord) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found in database");
-    }
-    const roomRecord = yield room_model_1.RoomModel.findById(room);
-    if (!roomRecord) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Room not found in database");
-    }
-    const slotRecords = yield slot_model_1.SlotModal.find({ _id: { $in: slots } });
-    //["64ae1234ef56", "64ae5678cd34", "64ae7890ab12"] are the slots aviailable in the database or not
-    if (slotRecords.length !== slots.length) {
-        // if they are not available in the database
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Slots not found in the database");
-    }
-    //if slots created are not related to  the roomid
-    const invalidSlots = slotRecords.filter((slot) => !slot.room.equals(room));
-    if (invalidSlots.length > 0) {
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Slots do not belong to this specified room");
-    }
-    // console.log(slotRecords)
-    slotRecords.forEach((slot) => __awaiter(void 0, void 0, void 0, function* () {
-        slot.isBooked = true;
-        yield slot_model_1.SlotModal.findByIdAndUpdate({ _id: slot._id }, { $set: { isBooked: true } });
-    }));
-    const totalAmount = roomRecord.pricePerSlot * slotRecords.length;
-    const booking = {
-        date,
-        slots: slotRecords,
-        room: roomRecord,
-        user: userRecord,
-        totalAmount,
-    };
-    const createdBooking = yield booking_model_1.BookingModel.create(booking);
-    const bookingId = createdBooking._id;
-    const transformedOutput = yield (0, booking_aggregation_1.aggreGationPipeline)(bookingId);
-    return transformedOutput;
+const booking_utils_1 = require("./booking.utils");
+const getUserPaidBookingsService = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const fulldata = yield booking_model_1.BookingModel.find({
+        user: new mongodb_1.ObjectId(req.userId),
+        isConfirmed: "confirmed",
+    })
+        .populate({
+        path: "slot",
+        select: "-room", // Exclude the `room` field
+    })
+        .populate({
+        path: "room",
+    });
+    return fulldata;
 });
+//admin services
 const getAdminAllBookingsService = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield booking_model_1.BookingModel.find({ isDeleted: { $ne: true } });
+    const result = yield booking_model_1.BookingModel.find({
+        // isDeleted: { $ne: true },
+        isConfirmed: "confirmed",
+        paymentStatus: "paid",
+    });
     // return result
     const transformedOutput = yield Promise.all(result.map((booking) => __awaiter(void 0, void 0, void 0, function* () {
         const allBookings = yield (0, booking_aggregation_1.aggreGationPipeline)(booking._id);
         return allBookings;
     })));
     return transformedOutput;
+});
+const getAdminBookingByBookingIdService = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const bookingId = req.params.id;
+    const booking = yield booking_model_1.BookingModel.findOne({ _id: new mongodb_1.ObjectId(bookingId) });
+    const BookingData = yield (0, booking_aggregation_1.aggreGationPipeline)(booking === null || booking === void 0 ? void 0 : booking._id);
+    return BookingData;
 });
 const getPaymentCompleteBookingsService = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield booking_model_1.BookingModel.find({
@@ -143,13 +119,85 @@ const getUserBookingsService = (payload) => __awaiter(void 0, void 0, void 0, fu
     // console.log(result);
     return transformedOutput;
 });
+const getUserBookingsByDateService = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    // const { startTime, endTime, date, roomId } = req.query;
+    const startTime = decodeURIComponent(req.query.startTime);
+    const endTime = decodeURIComponent(req.query.endTime);
+    const date = decodeURIComponent(req.query.date);
+    const start = (0, booking_utils_1.convertTo24HourFormat)(startTime);
+    const end = (0, booking_utils_1.convertTo24HourFormat)(endTime);
+    //using roomId and date find,startTime, endTime the slots
+    function timeToDecimal(time) {
+        const [hours, minutes] = time.split(":").map(Number);
+        return hours + minutes / 60;
+    }
+    const localDecimalStart = timeToDecimal(start);
+    const localDecimalEnd = timeToDecimal(end);
+    const result = yield slot_model_1.SlotModal.findOne({
+        room: new mongodb_1.ObjectId(req.query.roomId), // Match the room
+        date: date, // Match the booking date
+        isDeleted: false, // Ignore deleted bookings
+        $or: [
+            {
+                startTime: { $lt: localDecimalEnd },
+                endTime: { $gt: localDecimalStart },
+            }, // Check for overlap
+        ],
+    });
+    return result;
+});
+//my createBookingNew routeservice
+const createBookingService = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const { roomId, startTime, endTime, date, pricePerSlot } = req.body;
+    if (!roomId || !startTime || !endTime || !date || !pricePerSlot) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Something went wrong.");
+    }
+    const userRecord = yield auth_model_1.UserModel.findById(req.userId);
+    if (!userRecord) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found in database");
+    }
+    const timeDifference = (0, booking_utils_1.getTimeDifference)(startTime, endTime);
+    const start = (0, booking_utils_1.convertTo24HourFormat)(startTime);
+    const end = (0, booking_utils_1.convertTo24HourFormat)(endTime);
+    const result = yield slot_model_1.SlotModal.find({
+        room: new mongodb_1.ObjectId(roomId),
+        date: date,
+        startTime: { $lte: start }, // Stored startTime should be before or equal to input start
+        endTime: { $gte: end }, // Stored endTime should be after or equal to input end
+    });
+    if (result.length > 0) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Slot already booked");
+    }
+    else {
+        const slot = yield slot_model_1.SlotModal.create({
+            room: new mongodb_1.ObjectId(roomId),
+            startTime: start,
+            endTime: end,
+            date: date,
+        });
+        const totalAmount = timeDifference * pricePerSlot;
+        const booking = yield booking_model_1.BookingModel.create({
+            user: req.userId,
+            room: new mongodb_1.ObjectId(roomId),
+            startTime: start,
+            endTime: end,
+            date: date,
+            slot: slot._id,
+            totalAmount: totalAmount,
+        });
+    }
+    return "transformedOutput";
+});
 exports.BookingService = {
-    getUserBookingsService,
-    createBookingService,
+    // getUserBookingsService,
+    // createBookingService,
     getAdminAllBookingsService,
-    getPaymentCompleteBookingsService,
-    adminUpdateBookingService,
-    confirmOrRejectBookingStatusService,
+    // getPaymentCompleteBookingsService,
+    // adminUpdateBookingService,
+    // confirmOrRejectBookingStatusService,
     deleteBookingService,
+    getUserBookingsByDateService,
+    getUserPaidBookingsService,
+    getAdminBookingByBookingIdService,
     // getUserBookingsFromDB,
 };

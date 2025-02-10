@@ -10,6 +10,7 @@ exports.roomSchema = new mongoose_1.Schema({
     pricePerSlot: { type: Number, required: true },
     image: { type: [String] },
     amenities: { type: [String], required: true },
-    isDeleted: { type: Boolean, default: false }
+    isDeleted: { type: Boolean, default: false },
+    description: { type: String, required: true }
 });
 exports.RoomModel = (0, mongoose_1.model)("Room", exports.roomSchema);

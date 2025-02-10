@@ -73,8 +73,8 @@ const mongodb_1 = require("mongodb");
 //My Boking Model
 const bookingSchema = new mongoose_1.Schema({
     date: { type: String, required: true },
-    slots: { type: [mongodb_1.ObjectId], required: true },
-    room: { type: mongodb_1.ObjectId, required: true },
+    slot: { type: mongodb_1.ObjectId, required: true, ref: "Slot" },
+    room: { type: mongodb_1.ObjectId, required: true, ref: "Room" },
     user: { type: mongodb_1.ObjectId, required: true },
     isConfirmed: { type: String, default: "unconfirmed" },
     isDeleted: { type: Boolean, default: false },

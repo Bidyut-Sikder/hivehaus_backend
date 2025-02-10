@@ -13,22 +13,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentCanceledForBooking = exports.PaymentFailedForBooking = exports.PaymentSuccessForBooking = exports.initiatePaymentForBooking = void 0;
+const mongodb_1 = require("mongodb");
 const TryCatchError_1 = __importDefault(require("../../utils/TryCatchError"));
 const payment_services_1 = require("./payment.services");
+const booking_model_1 = require("../booking/booking.model");
+const slot_model_1 = require("../slots/slot.model");
 exports.initiatePaymentForBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const paymentResult = yield payment_services_1.paymentServices.processPayment(req, res);
-    // return res.status(200).json({
-    //   success: true,
-    //   message: "Payment processed successfully",
-    //   data: paymentResult,
-    // });
 }));
 exports.PaymentSuccessForBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.redirect(302, `http://localhost:5173/success`);
+    const bookingId = req.params.bookingId;
+    const booking = yield booking_model_1.BookingModel.findByIdAndUpdate({ _id: new mongodb_1.ObjectId(bookingId) }, {
+        $set: {
+            isConfirmed: "confirmed",
+            paymentStatus: "paid",
+        },
+    }, { new: true });
+    res.redirect(`http://localhost:5173/success`);
+    // res.redirect(302, `http://localhost:5173/success`);
 }));
 exports.PaymentFailedForBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const bookingId = req.params.bookingId;
+    const booking = yield booking_model_1.BookingModel.findOne({ _id: bookingId });
+    if (booking) {
+        yield slot_model_1.SlotModal.deleteOne({ _id: new mongodb_1.ObjectId(booking.slot) });
+        yield booking_model_1.BookingModel.deleteOne({ _id: new mongodb_1.ObjectId(bookingId) });
+    }
     res.redirect(302, `http://localhost:5173/failed`);
 }));
 exports.PaymentCanceledForBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const bookingId = req.params.bookingId;
+    const booking = yield booking_model_1.BookingModel.findOne({ _id: bookingId });
+    if (booking) {
+        yield slot_model_1.SlotModal.deleteOne({ _id: new mongodb_1.ObjectId(booking.slot) });
+        yield booking_model_1.BookingModel.deleteOne({ _id: new mongodb_1.ObjectId(bookingId) });
+    }
     res.redirect(302, `http://localhost:5173/canceled`);
 }));

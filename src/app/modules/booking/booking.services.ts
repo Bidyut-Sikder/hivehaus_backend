@@ -182,14 +182,7 @@ const getUserBookingsByDateService = async (req: any) => {
   return result;
 };
 
-//i will get
-// {
-//   "roomId": "679ca57f6a683934a71cb09d",
-//   "startTime": "09:00 AM",
-//   "endTime": "05:00 PM",
-//   "date": "2025-02-03",
-//   "pricePerSlot": 120
-// }
+
 
 //my createBookingNew routeservice
 

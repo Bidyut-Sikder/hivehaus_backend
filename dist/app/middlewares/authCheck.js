@@ -18,7 +18,6 @@ const http_status_1 = __importDefault(require("http-status"));
 const auth_model_1 = require("../modules/auth/auth.model");
 const TryCatchError_1 = __importDefault(require("../utils/TryCatchError"));
 const authCheck = (...requiredRoles) => {
-    console.log(...requiredRoles);
     return (0, TryCatchError_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const authHeader = req.headers.authorization;
         if (!authHeader) {

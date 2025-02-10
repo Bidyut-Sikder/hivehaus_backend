@@ -16,7 +16,7 @@ exports.RoomController = void 0;
 const TryCatchError_1 = __importDefault(require("../../utils/TryCatchError"));
 const room_serverces_1 = require("./room.serverces");
 const createRoom = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield room_serverces_1.RoomService.createRoomService(req.body);
+    const result = yield room_serverces_1.RoomService.createRoomService(req);
     res.status(200).json({
         success: true,
         message: 'Room added successfully',
@@ -41,7 +41,6 @@ const getRooms = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, vo
     }
 }));
 const getRoomById = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.params);
     const result = yield room_serverces_1.RoomService.getRoomByIdService(req.params.id);
     res.status(200).json({
         success: true,
@@ -50,11 +49,11 @@ const getRoomById = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0,
     });
 }));
 const updateSingleRoom = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield room_serverces_1.RoomService.updateSingleRoomService(req.params.id, req.body);
+    const result = yield room_serverces_1.RoomService.updateSingleRoomService(req);
     res.status(200).json({
         success: true,
         message: 'Room updated successfully',
-        data: result
+        data: 'result'
     });
 }));
 const deleteRoom = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -20,11 +20,12 @@ exports.userSchema = new mongoose_1.Schema({
     email: { type: String, required: true },
     password: { type: String, required: true, select: false },
     phone: { type: String },
-    role: {
-        type: String,
-        enum: ["admin", "user"],
-        message: "{VALUE} is not a valid user",
-    },
+    // role: {
+    //   type: String,
+    //   enum: ["admin", "user"],
+    //   message: "{VALUE} is not a valid user",
+    // },
+    role: { type: String, default: 'user' },
     address: { type: String },
 }, 
 //prevents data from being printed out as object or json

@@ -18,7 +18,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
 // App Middlewares section Started
 app.use(express.json());
 app.use(cors());
@@ -29,16 +28,18 @@ app.use(cookieParser());
 app.use(ExpressMongoSanitize());
 app.use(helmet());
 app.use(hpp());
- 
+
 //Routes section Started
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello from the Workspace");
+  res.json({
+    message: "Welcome to the HaviHous API",
+    status: "success",
+  });
 });
 
 app.use("/api", router);
 
 // Error Handling Middlewares section Started
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
 export default app;
- 

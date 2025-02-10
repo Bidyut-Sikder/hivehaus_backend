@@ -10,7 +10,15 @@ import { BookingModel } from "../booking/booking.model";
 import { SlotModal } from "../slots/slot.model";
 
 const createRoomService = async (req: any) => {
-  const { name,description, roomNo, capacity, pricePerSlot, floorNo, amenities } = req.body;
+  const {
+    name,
+    description,
+    roomNo,
+    capacity,
+    pricePerSlot,
+    floorNo,
+    amenities,
+  } = req.body;
 
   const parsedData = {
     name,
@@ -45,7 +53,7 @@ const createRoomService = async (req: any) => {
 
 const getRoomsService = async (queryParams: any) => {
   const { search, capacity, price, sort } = queryParams;
-  console.log(queryParams);
+
   const query: any = { isDeleted: false };
 
   if (search) {
@@ -80,7 +88,6 @@ const getRoomsService = async (queryParams: any) => {
 };
 
 const getRoomByIdService = async (id: string) => {
-
   const matching = {
     $match: {
       _id: new Types.ObjectId(id), // Replace with your booking ID

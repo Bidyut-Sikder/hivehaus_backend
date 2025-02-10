@@ -20,7 +20,7 @@ const aggreGationPipeline = (bookingId, removeUser) => __awaiter(void 0, void 0,
     const populateSlots = {
         $lookup: {
             from: "slots", // The name of the slots collection
-            localField: "slots", // Field in the booking collection
+            localField: "slot", // Field in the booking collection
             foreignField: "_id", // Field in the slots collection
             as: "slotDetails", // The resulting array with slot data
         },
@@ -55,7 +55,7 @@ const aggreGationPipeline = (bookingId, removeUser) => __awaiter(void 0, void 0,
         populateUserDetails,
         projection,
     ]);
-    const transformedOutput = Object.assign(Object.assign({}, fulldata[0]), { slots: fulldata[0].slotDetails, room: fulldata[0].room[0], 
+    const transformedOutput = Object.assign(Object.assign({}, fulldata[0]), { slot: fulldata[0].slotDetails[0], room: fulldata[0].room[0], 
         // user: fulldata[0].user[0], // Get the first user document
         user: removeUser ? undefined : fulldata[0].user[0], slotDetails: undefined });
     return transformedOutput;

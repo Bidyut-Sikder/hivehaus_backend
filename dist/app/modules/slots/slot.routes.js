@@ -17,6 +17,11 @@ router.post('/',
 // auth('admin'),
 (0, requestValidator_1.default)(slot_validation_1.zod_slotValidation.zod_slotValidationSchema), slot_controller_1.slotController.createSlot);
 router.get('/availability', slot_controller_1.slotController.getAvailableAllSlots);
-router.patch('/:id', (0, requestValidator_1.default)(slot_validation_1.zod_slotValidation.zod_updateSlotValidationSchema), slot_controller_1.slotController.updatedSlots);
-router.delete('/:id', slot_controller_1.slotController.deleteSlot);
+// router.patch('/:id',
+//     requestValidator(zod_slotValidation.zod_updateSlotValidationSchema),
+//     slotController.updatedSlots
+// )
+// router.delete('/:id',
+//     slotController.deleteSlot
+// )
 exports.slotRoutes = router;

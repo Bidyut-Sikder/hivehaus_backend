@@ -8,7 +8,6 @@ const payment_routes_1 = require("../modules/payment/payment.routes");
 const router = (0, express_1.Router)();
 router.use("/auth", auth_routes_1.authRouter);
 router.use("/rooms", room_routes_1.roomRoutes);
-// router.use("/slots", slotRoutes);
 router.use("/bookings", booking_routes_1.bookingRoutes);
 router.use("/payments", payment_routes_1.PaymentRoutes);
 exports.default = router;

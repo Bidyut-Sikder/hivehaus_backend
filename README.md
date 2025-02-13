@@ -1,65 +1,96 @@
-# Backend Management System for Nexus Co-Working Space Reservations
-*This project is a backend management system designed for an agency that offers co-working spaces for meetings and discussions. The system streamlines the booking process by providing a web application for managing room reservations. The backend is built using Node.js, Express, MongoDB, and other supporting libraries.*
+# HiveHaus Backend
 
-#### Live Link - https://nexus-workspace.vercel.app/
+## Overview
+HiveHaus is a backend service for managing office house rentals. Built with TypeScript and Express.js, it provides secure authentication using JSON Web Tokens (JWT), database integration with MongoDB, and cloud storage for media assets. JWT is used to authenticate users and maintain session security, ensuring only authorized access to protected routes.
 
-### Features
+## Features
+- User authentication with JWT and bcrypt
+- Secure API endpoints with Helmet, CORS, and rate limiting
+- Cloud image storage with Cloudinary
+- Payment integration using SSLCommerz
+- Data validation with Zod
+- MongoDB connection with Mongoose
 
-- User authentication and authorization
-- Room management
-- Reservation management
-- Integration with MongoDB for data storage
-- Input validation using Zod
-
-### Prerequisites
-
-Before you begin, ensure you have the following installed on your machine:
-
-- Node.js (version 14 or later)
-- npm (Node Package Manager)
-- MongoDB (version 4.4 or later)
-- Installation
-
-1.Clone the repository
-
-```
-git clone https://github.com/SAIKOT-ROY/Nexus-Workspace-Backend_Management.git
-cd your-repository-name
+## Installation
+Clone the repository and navigate into the project folder:
+```sh
+git clone <repository-url>
+cd hivehaus-backend
 ```
 
-2.Install dependencies:
-
-```
+Install dependencies:
+```sh
 npm install
 ```
 
-3.Create a .env file in the root directory and add the following environment variables:
-
+## Environment Variables
+Create a `.env` file in the root directory and add the following variables:
 ```
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/coworking
-JWT_SECRET=your_jwt_secret_key
+    PORT=
+    MONGODB_CONNECTION_STRING_DEV=
+    MONGODB_CONNECTION_STRING=
+
+    FRONTEND_URL=
+    BACKEND_API=
+
+    JWT_SECRET_KEY=
+    BCRYPT_SALT_ROUNDS= 10
+    NODE_VERSION=
+  
+
+    #cloudinary variables
+
+    CLOUDINARY_CLOUD_NAME=
+    CLOUDINARY_API_KEY=
+    CLOUDINARY_API_SECRET=
+
+
+    STORE_ID=
+    STORE_PASSWORD=
 ```
 
-4.Run the development server:
-
-```
+## Running the Application
+To run the project in development mode:
+```sh
 npm run start:dev
 ```
 
-## Project Structure
+To build the project:
+```sh
+npm run build
 ```
-├── src
-│   ├── controllers
-│   ├── models
-│   ├── routes
-│   ├── middlewares
-│   ├── utils
-│   └── server.ts
-├── .env
-├── .eslintrc.json
-├── package.json
-└── README.md
+
+To start the production server:
+```sh
+npm start
+```
+
+## Folder Structure
+```
+hivehaus-backend/src
+│── app/
+│   ├── config/           
+│   ├── errors/    
+│   ├── middlewares/      
+│   ├── modules/          
+│   ├── utils/           
+│   ├── services/        
+│   ├── utils/                                    
+│── app.ts          
+│── main.ts          
+│── .gitignore          
+│── package.json         
+│── tsconfig.json       
+│── README.md            
+```
+
+## API Documentation
+TBD - You can use Postman or Swagger for API testing.
+
+## Code Style
+The project follows ESLint and Prettier configurations. To check for linting issues, run:
+```sh
+npm run lint
 ```
 
 

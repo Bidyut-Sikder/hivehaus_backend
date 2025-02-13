@@ -14,7 +14,7 @@ HiveHaus is a backend service for managing office house rentals. Built with Type
 ## Installation
 Clone the repository and navigate into the project folder:
 ```sh
-git clone <repository-url>
+git clone https://github.com/Bidyut-Sikder/hivehaus_backend.git
 cd hivehaus-backend
 ```
 

@@ -241,15 +241,12 @@ const createBookingService = async (req: any) => {
 };
 
 export const BookingService = {
-  // getUserBookingsService,
-  // createBookingService,
+
   getAdminAllBookingsService,
-  // getPaymentCompleteBookingsService,
-  // adminUpdateBookingService,
-  // confirmOrRejectBookingStatusService,
+
   deleteBookingService,
   getUserBookingsByDateService,
   getUserPaidBookingsService,
   getAdminBookingByBookingIdService,
-  // getUserBookingsFromDB,
+
 };

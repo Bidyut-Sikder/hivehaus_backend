@@ -104,13 +104,7 @@ const getRoomByIdService = (id) => __awaiter(void 0, void 0, void 0, function* (
     };
     const resultt = yield room_model_1.RoomModel.aggregate([
         matching,
-        // populateSlots,
-        // filterSlots,
     ]);
-    // const result = await RoomModel.findOne({ _id: id, isDeleted: false });
-    // if (!result) {
-    //   throw new AppError(httpStatus.NOT_FOUND, "No Data Found");
-    // }
     return resultt[0];
 });
 const updateSingleRoomService = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -125,10 +119,6 @@ const updateSingleRoomService = (req) => __awaiter(void 0, void 0, void 0, funct
     const updatedImagesUrls = yield (0, cloudinaryUploader_1.uploadToCloudinary)(imageFiles);
     updatedRoom.image = [...updatedImagesUrls, ...((updatedRoom === null || updatedRoom === void 0 ? void 0 : updatedRoom.image) || [])];
     yield updatedRoom.save();
-    // const result = await RoomModel.findByIdAndUpdate(id, payload, {
-    //   new: true,
-    //   runValidators: true,
-    // });
     return updatedRoom;
 });
 const deleteSingleRoomService = (id) => __awaiter(void 0, void 0, void 0, function* () {

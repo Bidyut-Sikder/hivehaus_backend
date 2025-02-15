@@ -15,22 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookingController = void 0;
 const TryCatchError_1 = __importDefault(require("../../utils/TryCatchError"));
 const booking_services_1 = require("./booking.services");
-// const createBooking = TryCatchError(async (req: Request, res: Response) => {
-//   const result = await BookingService.createBookingService(req);
-//   res.status(200).json({
-//     success: true,
-//     message: "Booking created successfully",
-//     data: result,
-//   });
-// });
-// const createBooking = TryCatchError(async (req: Request, res: Response) => {
-//   const result = await BookingService.createBookingService(req.body);
-//   res.status(200).json({
-//     success: true,
-//     message: "Booking created successfully",
-//     data: result,
-//   });
-// });
 //admin bookings
 const getAdminAllBookings = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield booking_services_1.BookingService.getAdminAllBookingsService();
@@ -51,13 +35,6 @@ const getAdminAllBookings = (0, TryCatchError_1.default)((req, res) => __awaiter
 }));
 const getAdminBookingByBookingId = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield booking_services_1.BookingService.getAdminBookingByBookingIdService(req);
-    // if (result.length === 0) {
-    //   res.status(404).json({
-    //     success: false,
-    //     message: "No Data Found",
-    //     data: result,
-    //   });
-    // } else {
     res.status(200).json({
         success: true,
         message: " Booking retrieved successfully",
@@ -83,46 +60,6 @@ const getUserPaidBookings = (0, TryCatchError_1.default)((req, res) => __awaiter
         });
     }
 }));
-// const getPaidBookings = TryCatchError(async (req: Request, res: Response) => {
-//   const result = await BookingService.getPaymentCompleteBookingsService();
-//   if (result.length === 0) {
-//     res.status(404).json({
-//       success: false,
-//       message: "No Data Found",
-//       data: result,
-//     });
-//   } else {
-//     res.status(200).json({
-//       success: true,
-//       message: "Paid bookings retrieved successfully",
-//       data: result,
-//     });
-//   }
-// });
-// const updateBooking = TryCatchError(async (req: Request, res: Response) => {
-//   const result = await BookingService.adminUpdateBookingService(
-//     req.params.id,
-//     req.body
-//   );
-//   res.status(200).json({
-//     success: true,
-//     message: "Bookings updated successfully",
-//     data: result,
-//   });
-// });
-// const confirmOrAndRejectBookingStatus = TryCatchError(
-//   async (req: Request, res: Response) => {
-//     const result = await BookingService.confirmOrRejectBookingStatusService(
-//       req.params.id,
-//       req.body.status
-//     );
-//     res.status(200).json({
-//       success: true,
-//       message: result.message,
-//       data: result.booking,
-//     });
-//   }
-// );
 const deleteBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield booking_services_1.BookingService.deleteBookingService(req.params.id);
     res.status(200).json({
@@ -131,41 +68,8 @@ const deleteBooking = (0, TryCatchError_1.default)((req, res) => __awaiter(void 
         data: result,
     });
 }));
-//user-booking controller
-// const getUserAllBookings = TryCatchError(
-//   async (req: Request, res: Response) => {
-//     const token = req.headers.authorization;
-//     const result = await BookingService.getUserBookingsService(token);
-//     if (result.length === 0) {
-//       res.status(404).json({
-//         success: false,
-//         message: "No Data Found",
-//         data: result,
-//       });
-//     } else {
-//       res.status(200).json({
-//         success: true,
-//         message: "User bookings retrieved successfully",
-//         data: result,
-//       });
-//     }
-//   }
-// );
 const getUserAllBookingsByDate = (0, TryCatchError_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield booking_services_1.BookingService.getUserBookingsByDateService(req);
-    // if (result.length === 0) {
-    //   res.status(404).json({
-    //     success: false,
-    //     message: "No Data Found",
-    //     data: result,
-    //   });
-    // } else {
-    //   res.status(200).json({
-    //     success: true,
-    //     message: "User bookings by date retrieved successfully",
-    //     data: result,
-    //   });
-    // }
     res.status(200).json({
         success: true,
         message: "User bookings by date retrieved successfully",
@@ -173,15 +77,9 @@ const getUserAllBookingsByDate = (0, TryCatchError_1.default)((req, res) => __aw
     });
 }));
 exports.BookingController = {
-    // getUserAllBookings,
-    // createBooking,
     getAdminAllBookings,
     getAdminBookingByBookingId,
     deleteBooking,
     getUserPaidBookings,
     getUserAllBookingsByDate,
-    // getPaidBookings,
-    // updateBooking,
-    // confirmOrAndRejectBookingStatus,
-    // getUserAllBookings,
 };

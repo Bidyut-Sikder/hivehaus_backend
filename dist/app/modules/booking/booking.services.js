@@ -198,15 +198,9 @@ const createBookingService = (req) => __awaiter(void 0, void 0, void 0, function
     return "transformedOutput";
 });
 exports.BookingService = {
-    // getUserBookingsService,
-    // createBookingService,
     getAdminAllBookingsService,
-    // getPaymentCompleteBookingsService,
-    // adminUpdateBookingService,
-    // confirmOrRejectBookingStatusService,
     deleteBookingService,
     getUserBookingsByDateService,
     getUserPaidBookingsService,
     getAdminBookingByBookingIdService,
-    // getUserBookingsFromDB,
 };

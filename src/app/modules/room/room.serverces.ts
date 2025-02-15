@@ -116,14 +116,9 @@ const getRoomByIdService = async (id: string) => {
   };
   const resultt = await RoomModel.aggregate([
     matching,
-    // populateSlots,
-    // filterSlots,
   ]);
 
-  // const result = await RoomModel.findOne({ _id: id, isDeleted: false });
-  // if (!result) {
-  //   throw new AppError(httpStatus.NOT_FOUND, "No Data Found");
-  // }
+
 
   return resultt[0];
 };
@@ -149,10 +144,6 @@ const updateSingleRoomService = async (req: any) => {
 
   await updatedRoom.save();
 
-  // const result = await RoomModel.findByIdAndUpdate(id, payload, {
-  //   new: true,
-  //   runValidators: true,
-  // });
 
   return updatedRoom;
 };

@@ -16,12 +16,14 @@ const router = express.Router();
 // );
 
 //admin booking apis
+
 router.get("/admin-paid",  authCheck("admin"), BookingController.getAdminAllBookings);
 router.get(
-  "/admin-paid-booking/:id",
+  "/admin-paid-booking/:id", 
   authCheck("admin"),
   BookingController.getAdminBookingByBookingId
 );
+
 router.delete("/:id", authCheck("admin"), BookingController.deleteBooking);
 
 // router.get("/", authCheck("admin"), BookingController.getAdminAllBookings);

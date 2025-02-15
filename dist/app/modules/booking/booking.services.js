@@ -97,8 +97,8 @@ const confirmOrRejectBookingStatusService = (id, status) => __awaiter(void 0, vo
     };
 });
 const deleteBookingService = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield booking_model_1.BookingModel.findByIdAndUpdate({ _id: id }, { isDeleted: true }, { new: true }).select("-paymentStatus -__v");
-    if (!result) {
+    const result = yield booking_model_1.BookingModel.deleteOne({ _id: new mongodb_1.ObjectId(id) });
+    if (result.deletedCount !== 1) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Booking not Found");
     }
     return result;

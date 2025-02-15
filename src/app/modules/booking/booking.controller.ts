@@ -138,6 +138,7 @@ const getUserPaidBookings = TryCatchError(async (req: Request, res: Response) =>
 // );
 
 const deleteBooking = TryCatchError(async (req: Request, res: Response) => {
+ 
   const result = await BookingService.deleteBookingService(req.params.id);
 
   res.status(200).json({

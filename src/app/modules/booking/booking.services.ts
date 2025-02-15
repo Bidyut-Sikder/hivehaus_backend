@@ -112,13 +112,9 @@ const confirmOrRejectBookingStatusService = async (
 };
 
 const deleteBookingService = async (id: string) => {
-  const result = await BookingModel.findByIdAndUpdate(
-    { _id: id },
-    { isDeleted: true },
-    { new: true }
-  ).select("-paymentStatus -__v");
+  const result = await BookingModel.deleteOne({ _id: new ObjectId(id) });
 
-  if (!result) {
+  if (result.deletedCount !== 1) {
     throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
   }
   return result;
@@ -181,8 +177,6 @@ const getUserBookingsByDateService = async (req: any) => {
 
   return result;
 };
-
-
 
 //my createBookingNew routeservice
 

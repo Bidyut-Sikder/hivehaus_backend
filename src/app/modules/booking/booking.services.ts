@@ -112,12 +112,24 @@ const confirmOrRejectBookingStatusService = async (
 };
 
 const deleteBookingService = async (id: string) => {
-  const result = await BookingModel.deleteOne({ _id: new ObjectId(id) });
+  const result = await BookingModel.findByIdAndDelete({
+    _id: new ObjectId(id),
+  });
 
-  if (result.deletedCount !== 1) {
-    throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
+  const deleteSlot = await SlotModal.deleteOne({
+    _id: new ObjectId(result?.slot),
+  });
+
+  // if (result !== null && deleteSlot.deletedCount !== 0) {
+  //   throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
+  // }
+  // return result;
+
+  if (result !== null && deleteSlot.deletedCount !== 0) {
+    return result._id;
   }
-  return result;
+
+  throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
 };
 
 //user-booking service

@@ -97,11 +97,20 @@ const confirmOrRejectBookingStatusService = (id, status) => __awaiter(void 0, vo
     };
 });
 const deleteBookingService = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield booking_model_1.BookingModel.deleteOne({ _id: new mongodb_1.ObjectId(id) });
-    if (result.deletedCount !== 1) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Booking not Found");
+    const result = yield booking_model_1.BookingModel.findByIdAndDelete({
+        _id: new mongodb_1.ObjectId(id),
+    });
+    const deleteSlot = yield slot_model_1.SlotModal.deleteOne({
+        _id: new mongodb_1.ObjectId(result === null || result === void 0 ? void 0 : result.slot),
+    });
+    // if (result !== null && deleteSlot.deletedCount !== 0) {
+    //   throw new AppError(httpStatus.NOT_FOUND, "Booking not Found");
+    // }
+    // return result;
+    if (result !== null && deleteSlot.deletedCount !== 0) {
+        return result._id;
     }
-    return result;
+    throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Booking not Found");
 });
 //user-booking service
 const getUserBookingsService = (payload) => __awaiter(void 0, void 0, void 0, function* () {
